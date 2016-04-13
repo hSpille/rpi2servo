@@ -1,10 +1,17 @@
 import tkinter
+import socket
+import sys
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server_address = ('localhost', 10001)
 
 def speedValue(val):
     print ("Speed:" + val)
+    sent = sock.sendto(bytes('Speed:'+val,'UTF-8'), server_address)
 
 def steerValue(val):
     print ("Steer:" +val)
+    sent = sock.sendto(bytes('Steer:'+val, 'UTF-8'), server_address)
 
 root = tkinter.Tk()
 root.title("control the blind")
