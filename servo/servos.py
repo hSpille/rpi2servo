@@ -30,6 +30,15 @@ def time_limit(seconds):
     finally:
         signal.alarm(0)
 
+def setServoPulse(channel, pulse):
+  pulseLength = 1000000                   # 1,000,000 us per second
+  pulseLength /= 60                       # 60 Hz
+  print "%d us per period" % pulseLength
+  pulseLength /= 4096                     # 12 bits of resolution
+  print "%d us per bit" % pulseLength
+  pulse *= 1000
+  pulse /= pulseLength
+  pwm.setPWM(channel, 0, pulse)
 
 def listen():
     datagram = server.recv( 1024 )
@@ -40,13 +49,17 @@ def listen():
 
 def actuate(instruction):
     sys.stdout.write("\rInstruction: " + instruction )
+    if "Speed" in instruction:
+        print("Setting speed: " ,instruction[6:] )
+        pwm.setPWM(0, 0, instruction[6:])
     sys.stdout.flush()
 
 
 
 #Begin main
 #Stopping first
-actuate(StopString)
+pwm = PWM(0x40)
+pwm.setPWMFreq(60)  
 if os.path.exists( SocketAdr):
 	os.remove( SocketAdr )
 server = socket.socket( socket.AF_UNIX, socket.SOCK_DGRAM )

@@ -11,11 +11,11 @@ server_address = ('localhost', 10001)
 
 def speedValue(val):
     print ("Speed:" + val)
-    sent = sock.sendto(bytes('Speed:'+val,'UTF-8'), server_address)
+    sent = sock.sendto(bytes('speed:'+val,'UTF-8'), server_address)
 
 def steerValue(val):
     print ("Steer:" +val)
-    sent = sock.sendto(bytes('Steer:'+val, 'UTF-8'), server_address)
+    sent = sock.sendto(bytes('steer:'+val, 'UTF-8'), server_address)
 
 
 def gamepadStuff(): 
@@ -27,6 +27,7 @@ def gamepadStuff():
 		if event.type == pygame.JOYAXISMOTION:
 			if(event.axis == 5):
 				value = ((event.value * 100) + 100) / 2
+				value =  value*4.5 + 150
 				speedValue(str(+int(round(value))))
 				scale2.set(int(round(value)))
 
