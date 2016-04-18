@@ -5,6 +5,13 @@ import time
 import signal
 import sys
 from contextlib import contextmanager
+from Adafruit_PWM_Servo_Driver import PWM
+
+
+pwm = PWM(0x40)
+#pwm = PWM(0x40, debug=True)
+servoMin = 150  # Min pulse length out of 4096
+servoMax = 600  # Max pulse length out of 4096
 
 SocketAdr = "/tmp/python_socket.sock"
 StopString = "HALT"
