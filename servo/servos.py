@@ -49,9 +49,9 @@ def listen():
 
 def actuate(instruction):
     sys.stdout.write("\rInstruction: " + instruction )
-    if "Speed" in instruction:
-        print("Setting speed: " ,instruction[6:] )
-        pwm.setPWM(0, 0, instruction[6:])
+    if "speed" in instruction:
+        sys.stdout.write("\rSetting speed: "  +instruction[6:] )
+        pwm.setPWM(0, 0, int(instruction[6:]))
     sys.stdout.flush()
 
 
