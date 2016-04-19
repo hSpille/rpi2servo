@@ -30,7 +30,6 @@ func readFromGui(guiChan chan<- string) {
 	buf := make([]byte, 1024)
 	for {
 		n, addr, err := ServerConn.ReadFromUDP(buf)
-		fmt.Println("FromGui ", string(buf[0:n]), " from ", addr)
 		guiChan <- string(buf[0:n])
 		if err != nil {
 			fmt.Println("Error: ", err)

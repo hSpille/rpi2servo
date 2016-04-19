@@ -12,9 +12,11 @@ pwm = PWM(0x40)
 #pwm = PWM(0x40, debug=True)
 servoMin = 150  # Min pulse length out of 4096
 servoMax = 600  # Max pulse length out of 4096
+steerChannel = 1
+speedChannel = 0
 
 SocketAdr = "/tmp/python_socket.sock"
-StopString = "HALT"
+StopString = "speed:150"
 TimeOutSeconds = 4
 
 class TimeoutException(Exception): pass
@@ -50,8 +52,9 @@ def listen():
 def actuate(instruction):
     sys.stdout.write("\rInstruction: " + instruction )
     if "speed" in instruction:
-        sys.stdout.write("\rSetting speed: "  +instruction[6:] )
-        pwm.setPWM(0, 0, int(instruction[6:]))
+        pwm.setPWM(speedChannel, 0, int(instruction[6:]))
+    if "steer" in instruction:
+        pwm.setPWM(steerChannel, 0, int(instruction[6:]))
     sys.stdout.flush()
 
 
@@ -66,6 +69,7 @@ server = socket.socket( socket.AF_UNIX, socket.SOCK_DGRAM )
 server.bind(SocketAdr)
  
 print("\nListening for first connection")
+actuate(StopString)
 datagram = server.recv( 1024 )
 print("Here we go")
 doListen = True;

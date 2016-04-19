@@ -6,15 +6,19 @@ from pygame.locals import *
 
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_address = ('localhost', 10001)
+server_address = ('192.168.178.58', 10001)
 
 
 def speedValue(val):
-    print ("Speed:" + val)
+	if(val > 150):
+		return
+    print ("Speedx:" + val)
     sent = sock.sendto(bytes('speed:'+val,'UTF-8'), server_address)
 
 def steerValue(val):
-    print ("Steer:" +val)
+	if(val > 150):
+		return
+    print ("Steerx:" +val)
     sent = sock.sendto(bytes('steer:'+val, 'UTF-8'), server_address)
 
 
@@ -27,11 +31,14 @@ def gamepadStuff():
 		if event.type == pygame.JOYAXISMOTION:
 			if(event.axis == 5):
 				value = ((event.value * 100) + 100) / 2
+				scale2.set(int(round(value)))
 				value =  value*4.5 + 150
 				speedValue(str(+int(round(value))))
-				scale2.set(int(round(value)))
-
-			
+			if(event.axis == 0):
+				value = ((event.value * 100)) / 2
+				scale.set(int(round(value)))
+				value =  (value+50)*4.5 + 150
+				steerValue(str(+int(round(value))))
 	root.after(50, gamepadStuff)
 
 pygame.joystick.init()
