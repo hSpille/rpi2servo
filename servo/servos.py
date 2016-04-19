@@ -16,7 +16,7 @@ steerChannel = 1
 speedChannel = 0
 
 SocketAdr = "/tmp/python_socket.sock"
-StopString = "speed:150"
+StopString = "speed:350"
 TimeOutSeconds = 4
 
 class TimeoutException(Exception): pass
