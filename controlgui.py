@@ -10,16 +10,18 @@ server_address = ('192.168.178.58', 10001)
 
 
 def speedValue(val):
-	if(val > 150):
+	if(int(val) < 150):
 		return
-    print ("Speedx:" + val)
-    sent = sock.sendto(bytes('speed:'+val,'UTF-8'), server_address)
+	print ("Speedx:" + val)
+	sent = sock.sendto(bytes('speed:'+val,'UTF-8'), server_address)
+
+
 
 def steerValue(val):
-	if(val > 150):
+	if(int(val) < 150):
 		return
-    print ("Steerx:" +val)
-    sent = sock.sendto(bytes('steer:'+val, 'UTF-8'), server_address)
+	print ("Steerx:" +val)
+	sent = sock.sendto(bytes('steer:'+val, 'UTF-8'), server_address)
 
 
 def gamepadStuff(): 
