@@ -5,8 +5,12 @@ import pygame
 from pygame.locals import *
 
 
+lastBrakeValue = 0
+lastSteerValue = 0
+lastSpeedValue = 0
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('192.168.178.58', 10001)
+
 
 pygame.joystick.init()
 joystick_count = pygame.joystick.get_count()
@@ -20,33 +24,40 @@ for i in range(joystick_count):
 
 
 
-
-
 def speedValue(val):
 	if(int(val) < 150):
 		return
+	global lastSpeedValue
+	if(val == lastSpeedValue):
+		return
+	lastSpeedValue = val
 	print ("Speed:" + val)
 	sent = sock.sendto(bytes('speed:'+val,'UTF-8'), server_address)
 
 def brakeValue(val):
 	if(int(val) < 150):
 		return
+	global lastBrakeValue
+	if(lastBrakeValue == val):
+		return
+	lastBrakeValue = val
 	print ("Brake:" + val)
 	sent = sock.sendto(bytes('brake:'+val,'UTF-8'), server_address)
-
 
 
 def steerValue(val):
 	if(int(val) < 150):
 		return
+	global lastSteerValue
+	if(lastSteerValue == val):
+		return
+	lastSteerValue  = val
 	print ("Steerx:" +val)
 	sent = sock.sendto(bytes('steer:'+val, 'UTF-8'), server_address)
 
 
 def gamepadStuff(): 
 	for event in pygame.event.get(): 
-		print("Brake: ", jStick.get_axis(12))
-		print("Speed: ", jStick.get_axis(13))
 		if event.type == pygame.JOYBUTTONDOWN:
 			print("Joystick button pressed.")
 		if event.type == pygame.JOYBUTTONUP:
@@ -62,9 +73,11 @@ def gamepadStuff():
 		value =  (value)*2.25 + 375
 		speedValue(str(+int(round(value))))
 		#Steer:
+		#300 Min 
+		#445 Max
 		value = ((jStick.get_axis(0) * 100)) / 2
 		scale.set(int(round(value)))
-		value =  (value+50)*4.5 + 150
+		value =  (value+50)*1.45 + 300
 		steerValue(str(+int(round(value))))
 	root.after(50, gamepadStuff)
 
