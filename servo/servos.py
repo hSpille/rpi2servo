@@ -51,6 +51,9 @@ def listen():
 
 def actuate(instruction):
     sys.stdout.write("\rInstruction: " + instruction )
+    if "brake" in instruction:
+        pwm.setPWM(speedChannel, 0, int(instruction[6:]))
+        return
     if "speed" in instruction:
         pwm.setPWM(speedChannel, 0, int(instruction[6:]))
     if "steer" in instruction:
