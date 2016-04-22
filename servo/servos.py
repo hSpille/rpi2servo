@@ -12,11 +12,11 @@ pwm = PWM(0x40)
 #pwm = PWM(0x40, debug=True)
 servoMin = 150  # Min pulse length out of 4096
 servoMax = 600  # Max pulse length out of 4096
-steerChannel = 1
+steerChannel = 4
 speedChannel = 0
 
 SocketAdr = "/tmp/python_socket.sock"
-StopString = "speed:350"
+StopString = "speed:250"
 TimeOutSeconds = 4
 
 class TimeoutException(Exception): pass
