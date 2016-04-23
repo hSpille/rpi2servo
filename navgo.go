@@ -60,7 +60,8 @@ func main() {
 			break
 		case _ = <-time.NewTicker(1000 * time.Millisecond).C:
 			fmt.Println("no message from Gui")
-			_, err := c.Write([]byte("nop"))
+			//Stop the car - we got no news from the controller for too long
+			_, err := c.Write([]byte("speed:250"))
 			if err != nil {
 				log.Fatal("write error:", err)
 				break
