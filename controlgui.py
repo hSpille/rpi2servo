@@ -100,7 +100,7 @@ def gamepadStuff():
 			#Speed
 			value = ((jStick.get_axis(13) * 100) +100) / 2
 			scale2.set(int(round(value)))
-			value =  (value)*2.25 + 375
+			value =  (value)*2 + 375
 			speedValue(str(+int(round(value))))
 			#Steer:
 			#300 Min 
@@ -112,8 +112,9 @@ def gamepadStuff():
 		root.after(50, gamepadStuff)
 		return
 	else:
-		speedValue(str(+int(round(chokeMinValue + randint(0,20)))))
-		scale2.set(chokeMinValue + randint(0,20))
+		toSet = chokeMinValue + randint(0,20)
+		scale2.set(toSet)
+		sock.sendto(bytes('speed:'+ str((chokeMinValue + randint(0,20)) *2+375),'UTF-8'), server_address)
 	root.after(200, gamepadStuff)
 	
 
