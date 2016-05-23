@@ -12,7 +12,7 @@ lastSteerValue = 0
 lastSpeedValue = 0
 chokeMinValue= 10
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_address = ('192.168.1.1', 10001)
+server_address = ('192.168.1.1 ', 10001)
 chokeButtonText = 'Choke'
 gamepadName = "none connected"
 chokeIsOn = False
@@ -100,9 +100,9 @@ def gamepadStuff():
 			#Speed
 			#441 max
 			# 150 min
-			value = ((jStick.get_axis(13) * 100) +100) / 2
+			value = ((jStick.get_axis(13) * 100) +150) / 2
 			scale2.set(int(round(value)))
-			value =  (value) + 375
+			value =  (value) + 350
 			speedValue(str(+int(round(value))))
 			#Steer:
 			#300 Min 
@@ -114,9 +114,9 @@ def gamepadStuff():
 		root.after(50, gamepadStuff)
 		return
 	else:
-		toSet = chokeMinValue + randint(0,20)
+		toSet = chokeMinValue + randint(15,35)
 		scale2.set(toSet)
-		sock.sendto(bytes('speed:'+ str((chokeMinValue + randint(0,20)) +375),'UTF-8'), server_address)
+		sock.sendto(bytes('speed:'+ str((chokeMinValue + toSet) +350),'UTF-8'), server_address)
 	root.after(200, gamepadStuff)
 	
 

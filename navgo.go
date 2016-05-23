@@ -38,9 +38,30 @@ func readFromGui(guiChan chan<- string) {
 	}
 }
 
+func readFromGps(gpsChan chan<- string) {
+	ServerAddr, err := net.ResolveUDPAddr("udp", ":10002")
+	if err != nil {
+		panic(err)
+	}
+	/* Now listen at selected port */
+	ServerConn, err := net.ListenUDP("udp", ServerAddr)
+	defer ServerConn.Close()
+	buf := make([]byte, 1024)
+	for {
+		n, addr, err := ServerConn.ReadFromUDP(buf)
+		fmt.Println("MSG from GPS: ", string(buf[0:n]), " from ", addr)
+		gpsChan <- string(buf[0:n])
+		if err != nil {
+			fmt.Println("Error: ", err)
+		}
+	}
+}
+
 func main() {
 	guiChannel := make(chan string, 1)
+	gpsChannel := make(chan string, 1)
 	go readFromGui(guiChannel)
+	go readFromGps(gpsChannel)
 	socketLocation := "/tmp/python_socket.sock"
 	//https://golang.org/pkg/net/#Dial
 	c, err := net.Dial("unixgram", socketLocation)
@@ -58,6 +79,13 @@ func main() {
 				panic(err)
 			}
 			break
+		case msg := <-gpsChannel:
+			fmt.Println("GPS message", msg)
+			_, err := c.Write([]byte(msg))
+			if err != nil {
+				panic(err)
+			}
+			break	
 		case _ = <-time.NewTicker(1000 * time.Millisecond).C:
 			fmt.Println("no message from Gui")
 			//Stop the car - we got no news from the controller for too long
