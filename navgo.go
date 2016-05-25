@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+var guiAddr *net.UDPAddr
+
 func reader(r io.Reader) {
 	buf := make([]byte, 1024)
 	for {
@@ -31,6 +33,7 @@ func readFromGui(guiChan chan<- string) {
 	for {
 		n, addr, err := ServerConn.ReadFromUDP(buf)
 		fmt.Println("MSG from GUI: ", string(buf[0:n]), " from ", addr)
+		guiAddr = addr
 		guiChan <- string(buf[0:n])
 		if err != nil {
 			fmt.Println("Error: ", err)
@@ -45,6 +48,8 @@ func readFromGps(gpsChan chan<- string) {
 	}
 	/* Now listen at selected port */
 	ServerConn, err := net.ListenUDP("udp", ServerAddr)
+	var GuiConnForGpsData net.Conn = nil
+
 	defer ServerConn.Close()
 	buf := make([]byte, 1024)
 	for {
@@ -54,6 +59,20 @@ func readFromGps(gpsChan chan<- string) {
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
+		if(guiAddr != nil){
+			if(GuiConnForGpsData == nil){
+				fmt.Println("opening connection to GUI")
+				GuiConnForGpsData, err = net.Dial("udp", string(guiAddr.IP.String()) + ":12000")
+				if err != nil{
+					fmt.Println(err)
+				}
+			}
+			fmt.Println("Sending gps data to client" )
+			_, err := GuiConnForGpsData.Write([]byte(string(buf[0:n])))
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
 	}
 }
 
@@ -62,6 +81,7 @@ func main() {
 	gpsChannel := make(chan string, 1)
 	go readFromGui(guiChannel)
 	go readFromGps(gpsChannel)
+
 	socketLocation := "/tmp/python_socket.sock"
 	//https://golang.org/pkg/net/#Dial
 	c, err := net.Dial("unixgram", socketLocation)
@@ -81,10 +101,6 @@ func main() {
 			break
 		case msg := <-gpsChannel:
 			fmt.Println("GPS message", msg)
-			_, err := c.Write([]byte(msg))
-			if err != nil {
-				panic(err)
-			}
 			break	
 		case _ = <-time.NewTicker(1000 * time.Millisecond).C:
 			fmt.Println("no message from Gui")

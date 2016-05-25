@@ -2,6 +2,8 @@ import tkinter
 import socket
 import sys
 import pygame
+import fcntl, os
+import errno
 from pygame.locals import *
 from tkinter import *
 from random import randint
@@ -11,8 +13,15 @@ lastBrakeValue = 0
 lastSteerValue = 0
 lastSpeedValue = 0
 chokeMinValue= 10
+#sendSocket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_address = ('192.168.1.1 ', 10001)
+server_address = ('192.168.1.101 ', 10001)
+#receive
+listenInterface = "0.0.0.0"
+listenPort = 12000
+receiverSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+receiverSocket.bind((listenInterface, listenPort))
+fcntl.fcntl(receiverSocket, fcntl.F_SETFL, os.O_NONBLOCK)
 chokeButtonText = 'Choke'
 gamepadName = "none connected"
 chokeIsOn = False
@@ -84,7 +93,27 @@ def steerValue(val):
 	sent = sock.sendto(bytes('steer:'+val, 'UTF-8'), server_address)
 
 
+def readFromNav():
+	msg = None
+	try:
+		msg = receiverSocket.recv(4096)
+		return msg
+	except socket.error as e:
+		err = e.args[0]
+		if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+			return msg
+		else:
+			# a "real" error occurred
+			print (e)
+			sys.exit(1)
+	return msg
+			
+
+
 def gamepadStuff():
+	gpsData = readFromNav()
+	if gpsData:
+		print("gpsData", gpsData)
 	global chokeIsOn
 	if(not chokeIsOn):
 		for event in pygame.event.get(): 
