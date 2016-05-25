@@ -15,7 +15,7 @@ lastSpeedValue = 0
 chokeMinValue= 10
 #sendSocket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_address = ('192.168.1.101 ', 10001)
+server_address = ('192.168.178.51 ', 10001)
 #receive
 listenInterface = "0.0.0.0"
 listenPort = 12000
@@ -97,7 +97,9 @@ def readFromNav():
 	msg = None
 	try:
 		msg = receiverSocket.recv(4096)
-		return msg
+		with open("gpslog.txt", "a") as text_file:
+			print(msg, file=text_file)
+		return msg	
 	except socket.error as e:
 		err = e.args[0]
 		if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
