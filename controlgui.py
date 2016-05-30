@@ -7,6 +7,7 @@ import errno
 from pygame.locals import *
 from tkinter import *
 from random import randint
+import json
 
 #ConfigStuff
 lastBrakeValue = 0
@@ -15,10 +16,15 @@ lastSpeedValue = 0
 chokeMinValue= 10
 #sendSocket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_address = ('192.168.178.51 ', 10001)
+server_address = ('192.168.178.57 ', 10001)
 #receive
 listenInterface = "0.0.0.0"
 listenPort = 12000
+#gps
+longitude = None
+latitude = None
+altitude = None
+speed = None
 receiverSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
 receiverSocket.bind((listenInterface, listenPort))
 fcntl.fcntl(receiverSocket, fcntl.F_SETFL, os.O_NONBLOCK)
@@ -97,9 +103,15 @@ def readFromNav():
 	msg = None
 	try:
 		msg = receiverSocket.recv(4096)
+		jsonString = msg.decode("UTF-8")
 		with open("gpslog.txt", "a") as text_file:
-			print(msg, file=text_file)
-		return msg	
+			print(jsonString, file=text_file)
+		#gpsData = json.loads(jsonString.replace("=",":"))
+		#print("Longitude:" + data["longitude"])
+		#print("Latitude: " +data["latitude"])
+		#print("Altitude: " +data["altitude"])
+		#print("Speed: " + data["speed"])
+		return jsonString
 	except socket.error as e:
 		err = e.args[0]
 		if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
@@ -108,7 +120,7 @@ def readFromNav():
 			# a "real" error occurred
 			print (e)
 			sys.exit(1)
-	return msg
+	return jsonString
 			
 
 
@@ -116,6 +128,9 @@ def gamepadStuff():
 	gpsData = readFromNav()
 	if gpsData:
 		print("gpsData", gpsData)
+		global gpsSpeed
+		gpsSpeed['text'] = gpsData
+		print(gpsSpeed['text'])
 	global chokeIsOn
 	if(not chokeIsOn):
 		for event in pygame.event.get(): 
@@ -158,31 +173,36 @@ padLabel = Label(root, text="Gamepad: " ,fg="black", height=1)
 padLabel.grid(row=0,column=1)
 caripLabel = Label(root, text="RC-Car-IP: ", fg="black", height=1)
 caripLabel.grid(row=1,column=1)
+speedLabel = Label(root, text="CurrentSpeed: ", fg="black", height=1)
+speedLabel.grid(row=2,column=1)
 
 pad = Label(root, text=gamepadName  ,fg="black", height=1)
 pad.grid(row=0,column=2)
 carip = Label(root, text=server_address, fg="black", height=1)
 carip.grid(row=1,column=2)
+gpsSpeed = Label(root, text="not moving", fg="black", height=1)
+gpsSpeed.grid(row=2,column=2)
+
 
 steer = Label(root, text="Steer",  fg="black", height=2)
-steer.grid(row=2,column=2)
+steer.grid(row=3,column=2)
 scale = tkinter.Scale(orient='horizontal', from_=-50, to=50, command=steerValue)
-scale.grid(row=3, column=2 )
+scale.grid(row=4, column=2 )
 
-speed = Label(root, text="Speed", bg="green", fg="white", height=2)
-speed.grid(row=2,column=3)
+greenSpeedRectangle = Label(root, text="Speed", bg="green", fg="white", height=2)
+greenSpeedRectangle.grid(row=3,column=3)
 scale2 = tkinter.Scale(orient='vertical', from_=100, to=0, command=speedValue)
-scale2.grid(row=3, column=3)
+scale2.grid(row=4, column=3)
 
 brake = Label(root, text="Brake", bg="red", fg="white", height=2)
-brake.grid(row=2,column=4)
+brake.grid(row=3,column=4)
 scale3 = tkinter.Scale(orient='vertical', from_=100, to=0, command=brakeValue)
-scale3.grid(row=3, column=4)
+scale3.grid(row=4, column=4)
 
 chokeLabel = Label(root, text="off", fg="black", height=2)
-chokeLabel.grid(row=4,column=2)
+chokeLabel.grid(row=5,column=2)
 b = Button(root, text=chokeButtonText ,command=chokeFunc)
-b.grid(row=4,column=1)
+b.grid(row=5,column=1)
 
 
 

@@ -68,7 +68,7 @@ func readFromGps(gpsChan chan<- string) {
 				}
 			}
 			fmt.Println("Sending gps data to client" )
-			_, err := GuiConnForGpsData.Write([]byte(string(buf[0:n])))
+			_, err := GuiConnForGpsData.Write(buf[0:n])
 			if err != nil {
 				fmt.Println(err)
 			}
