@@ -2,3 +2,4 @@ servo/Adafruit_I2C.pyc
 servo/Adafruit_PWM_Servo_Driver.pyc
 navgo
 gpslog.txt
+*.xml

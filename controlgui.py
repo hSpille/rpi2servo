@@ -1,6 +1,7 @@
 import tkinter
 import socket
 import sys
+import time
 import pygame
 import fcntl, os
 import errno
@@ -8,15 +9,18 @@ from pygame.locals import *
 from tkinter import *
 from random import randint
 import json
+import gpxpy 
+import gpxpy.gpx 
 
 #ConfigStuff
 lastBrakeValue = 0
 lastSteerValue = 0
 lastSpeedValue = 0
 chokeMinValue= 10
+elevationValue = 0
 #sendSocket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_address = ('192.168.178.57 ', 10001)
+server_address = ('192.168.178.51 ', 10001)
 #receive
 listenInterface = "0.0.0.0"
 listenPort = 12000
@@ -37,7 +41,12 @@ root = tkinter.Tk()
 root.title("RC-Control")
 root.geometry("450x250+100+50")
 
-
+#gpx logging
+gpx = gpxpy.gpx.GPX() 
+gpx_track = gpxpy.gpx.GPXTrack() 
+gpx.tracks.append(gpx_track) 
+gpx_segment = gpxpy.gpx.GPXTrackSegment() 
+gpx_track.segments.append(gpx_segment) 
 
 
 pygame.joystick.init()
@@ -50,6 +59,7 @@ for i in range(joystick_count):
         gamepadName = joystick.get_name()
         if(i == 0):
         	jStick = joystick
+
 
 def chokeFunc():
 	global chokeLabel
@@ -107,6 +117,10 @@ def readFromNav():
 		with open("gpslog.txt", "a") as text_file:
 			print(jsonString, file=text_file)
 		#gpsData = json.loads(jsonString.replace("=",":"))
+		global elevationValue
+		elevationValue = elevationValue + 1
+		gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(data["longitude"], data["latitude"], elevation=elevationValue)) 
+
 		#print("Longitude:" + data["longitude"])
 		#print("Latitude: " +data["latitude"])
 		#print("Altitude: " +data["altitude"])
@@ -125,7 +139,8 @@ def readFromNav():
 
 
 def gamepadStuff():
-	gpsData = readFromNav()
+	#gpsData = readFromNav()
+	gpsData = None
 	if gpsData:
 		print("gpsData", gpsData)
 		global gpsSpeed
@@ -135,7 +150,14 @@ def gamepadStuff():
 	if(not chokeIsOn):
 		for event in pygame.event.get(): 
 			if event.type == pygame.JOYBUTTONDOWN:
-				print("Joystick button pressed.")
+				print("Joystick button pressed." , event.dict['button'])
+				if(event.dict['button'] == 15):
+					print("Starting new GPX file")
+					print('Created GPX:', gpx.to_xml())
+					timestr = time.strftime("%Y%m%d-%H%M%S")
+					with open("gpslog"+ timestr + ".xml", "a") as text_file:
+						print(gpx.to_xml(), file=text_file)
+
 			if event.type == pygame.JOYBUTTONUP:
 				print("Joystick button released.")
 			#Brake
