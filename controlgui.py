@@ -20,7 +20,7 @@ chokeMinValue= 10
 elevationValue = 0
 #sendSocket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_address = ('192.168.178.51 ', 10001)
+server_address = ('192.168.1.102 ', 10001)
 #receive
 listenInterface = "0.0.0.0"
 listenPort = 12000
@@ -111,12 +111,13 @@ def steerValue(val):
 
 def readFromNav():
 	msg = None
+	data = None
 	try:
 		msg = receiverSocket.recv(4096)
 		jsonString = msg.decode("UTF-8")
 		with open("gpslog.txt", "a") as text_file:
 			print(jsonString, file=text_file)
-		#gpsData = json.loads(jsonString.replace("=",":"))
+		data = json.loads(jsonString.replace("=",":"))
 		global elevationValue
 		elevationValue = elevationValue + 1
 		gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(data["longitude"], data["latitude"], elevation=elevationValue)) 
@@ -125,7 +126,7 @@ def readFromNav():
 		#print("Latitude: " +data["latitude"])
 		#print("Altitude: " +data["altitude"])
 		#print("Speed: " + data["speed"])
-		return jsonString
+		return data
 	except socket.error as e:
 		err = e.args[0]
 		if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
@@ -134,17 +135,16 @@ def readFromNav():
 			# a "real" error occurred
 			print (e)
 			sys.exit(1)
-	return jsonString
+	return data
 			
 
 
 def gamepadStuff():
-	#gpsData = readFromNav()
-	gpsData = None
+	gpsData = readFromNav()
 	if gpsData:
 		print("gpsData", gpsData)
 		global gpsSpeed
-		gpsSpeed['text'] = gpsData
+		gpsSpeed['text'] = "{:.9f}".format(gpsData["speed"]) 
 		print(gpsSpeed['text'])
 	global chokeIsOn
 	if(not chokeIsOn):
