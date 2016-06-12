@@ -20,7 +20,7 @@ chokeMinValue= 10
 elevationValue = 0
 #sendSocket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_address = ('192.168.1.102 ', 10001)
+server_address = ('192.168.10.1 ', 10001)
 #receive
 listenInterface = "0.0.0.0"
 listenPort = 12000
@@ -42,11 +42,10 @@ root.title("RC-Control")
 root.geometry("450x250+100+50")
 
 #gpx logging
-gpx = gpxpy.gpx.GPX() 
-gpx_track = gpxpy.gpx.GPXTrack() 
-gpx.tracks.append(gpx_track) 
-gpx_segment = gpxpy.gpx.GPXTrackSegment() 
-gpx_track.segments.append(gpx_segment) 
+gpx = None
+gpx_track = None
+gpx_segment = None
+
 
 
 pygame.joystick.init()
@@ -60,6 +59,13 @@ for i in range(joystick_count):
         if(i == 0):
         	jStick = joystick
 
+
+def createGpxTrack():
+	gpx = gpxpy.gpx.GPX() 
+	gpx_track = gpxpy.gpx.GPXTrack() 
+	gpx.tracks.append(gpx_track) 
+	gpx_segment = gpxpy.gpx.GPXTrackSegment() 
+	gpx_track.segments.append(gpx_segment) 
 
 def chokeFunc():
 	global chokeLabel
@@ -120,7 +126,9 @@ def readFromNav():
 		data = json.loads(jsonString.replace("=",":"))
 		global elevationValue
 		elevationValue = elevationValue + 1
-		gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(data["longitude"], data["latitude"], elevation=elevationValue)) 
+		point =  gpxpy.gpx.GPXTrackPoint(data["latitude"], data["longitude"], elevation=elevationValue)
+		point.speed = data["speed"]
+		gpx_segment.points.append(point)
 
 		#print("Longitude:" + data["longitude"])
 		#print("Latitude: " +data["latitude"])
@@ -144,7 +152,7 @@ def gamepadStuff():
 	if gpsData:
 		print("gpsData", gpsData)
 		global gpsSpeed
-		gpsSpeed['text'] = "{:.9f}".format(gpsData["speed"]) 
+		gpsSpeed['text'] = "{:.9f}".format(gpsData["speed"])
 		print(gpsSpeed['text'])
 	global chokeIsOn
 	if(not chokeIsOn):
@@ -157,6 +165,8 @@ def gamepadStuff():
 					timestr = time.strftime("%Y%m%d-%H%M%S")
 					with open("gpslog"+ timestr + ".xml", "a") as text_file:
 						print(gpx.to_xml(), file=text_file)
+						elevationValue = 0
+						createGpxTrack()
 
 			if event.type == pygame.JOYBUTTONUP:
 				print("Joystick button released.")
@@ -188,7 +198,7 @@ def gamepadStuff():
 	root.after(200, gamepadStuff)
 	
 
-
+createGpxTrack()
 pygame.init()
 
 padLabel = Label(root, text="Gamepad: " ,fg="black", height=1)
