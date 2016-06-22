@@ -61,9 +61,12 @@ for i in range(joystick_count):
 
 
 def createGpxTrack():
+	global gpx 
 	gpx = gpxpy.gpx.GPX() 
+	global gpx_track 
 	gpx_track = gpxpy.gpx.GPXTrack() 
 	gpx.tracks.append(gpx_track) 
+	global gpx_segment 
 	gpx_segment = gpxpy.gpx.GPXTrackSegment() 
 	gpx_track.segments.append(gpx_segment) 
 
@@ -152,7 +155,7 @@ def gamepadStuff():
 	if gpsData:
 		print("gpsData", gpsData)
 		global gpsSpeed
-		gpsSpeed['text'] = "{:.9f}".format(gpsData["speed"])
+		gpsSpeed['text'] = "{:.9f}".format(3.6 * gpsData["speed"])
 		print(gpsSpeed['text'])
 	global chokeIsOn
 	if(not chokeIsOn):
