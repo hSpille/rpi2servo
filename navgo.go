@@ -1,14 +1,22 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net"
+	"rpipyservo/gps"
 	"time"
 )
 
 var guiAddr *net.UDPAddr
+
+type GpsMessage struct {
+	Lat   float64
+	Long  float64
+	Speed float64
+}
 
 func reader(r io.Reader) {
 	buf := make([]byte, 1024)
@@ -42,38 +50,24 @@ func readFromGui(guiChan chan<- string) {
 }
 
 func readFromGps(gpsChan chan<- string) {
-	ServerAddr, err := net.ResolveUDPAddr("udp", ":10002")
-	if err != nil {
-		panic(err)
-	}
-	/* Now listen at selected port */
-	ServerConn, err := net.ListenUDP("udp", ServerAddr)
 	var GuiConnForGpsData net.Conn = nil
-
-	defer ServerConn.Close()
-	buf := make([]byte, 1024)
-	for {
-		n, addr, err := ServerConn.ReadFromUDP(buf)
-		fmt.Println("MSG from GPS: ", string(buf[0:n]), " from ", addr)
-		gpsChan <- string(buf[0:n])
+	gps.GpsLocation(func(lat, lon, speed float64) {
+		gpsLocation := GpsMessage{lat, lon, speed}
+		jsonGps, err := json.Marshal(&gpsLocation)
 		if err != nil {
-			fmt.Println("Error: ", err)
+			fmt.Println("Error", err)
 		}
-		if(guiAddr != nil){
-			if(GuiConnForGpsData == nil){
-				fmt.Println("opening connection to GUI")
-				GuiConnForGpsData, err = net.Dial("udp", string(guiAddr.IP.String()) + ":12000")
-				if err != nil{
-					fmt.Println(err)
-				}
+		gpsChan <- string(jsonGps)
+		if guiAddr != nil {
+			if GuiConnForGpsData == nil {
+				GuiConnForGpsData, _ = net.Dial("udp", string(guiAddr.IP.String())+":12000")
 			}
-			fmt.Println("Sending gps data to client" )
-			_, err := GuiConnForGpsData.Write(buf[0:n])
+			_, err := GuiConnForGpsData.Write(jsonGps)
 			if err != nil {
 				fmt.Println(err)
 			}
 		}
-	}
+	})
 }
 
 func main() {
@@ -101,7 +95,7 @@ func main() {
 			break
 		case msg := <-gpsChannel:
 			fmt.Println("GPS message", msg)
-			break	
+			break
 		case _ = <-time.NewTicker(1000 * time.Millisecond).C:
 			fmt.Println("no message from Gui")
 			//Stop the car - we got no news from the controller for too long

@@ -3,6 +3,7 @@ package gps
 // #cgo LDFLAGS: -lgps -lm
 // #include <gps.h>
 import "C"
+import "fmt"
 
 type GpsLocationCallback func(float64, float64, float64)
 
@@ -18,6 +19,8 @@ func GpsLocation(cb GpsLocationCallback) {
 			lon := float64(data.fix.longitude)
 			speed := float64(data.fix.speed)
 			cb(lat, lon, speed)
+		} else {
+			fmt.Println("No GPS fix:", data.fix.mode)
 		}
 	}
 }

@@ -25,7 +25,7 @@ server.bind(SocketAdr)
 doListen = True;
 while doListen:
     instruction = listen()
-    print(instruction)
+    print("SocketMock receives: " + instruction)
 #Ending
 server.close()
 os.remove(SocketAdr)

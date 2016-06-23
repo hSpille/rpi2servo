@@ -20,7 +20,7 @@ chokeMinValue= 10
 elevationValue = 0
 #sendSocket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_address = ('192.168.10.1 ', 10001)
+server_address = ('127.0.0.1 ', 10001)
 #receive
 listenInterface = "0.0.0.0"
 listenPort = 12000
@@ -129,8 +129,8 @@ def readFromNav():
 		data = json.loads(jsonString.replace("=",":"))
 		global elevationValue
 		elevationValue = elevationValue + 1
-		point =  gpxpy.gpx.GPXTrackPoint(data["latitude"], data["longitude"], elevation=elevationValue)
-		point.speed = data["speed"]
+		point =  gpxpy.gpx.GPXTrackPoint(data["Lat"], data["Long"], elevation=elevationValue)
+		point.speed = data["Speed"]
 		gpx_segment.points.append(point)
 
 		#print("Longitude:" + data["longitude"])
