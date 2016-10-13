@@ -1,10 +1,21 @@
 #!/usr/bin/python
 import smbus
 import math
+import socket
+import os, os.path
+import time
+import signal
+import sys
+
 
 # Register
 power_mgmt_1 = 0x6b
 power_mgmt_2 = 0x6c
+SocketAdr = "/tmp/gyro_socket.sock"
+if os.path.exists( SocketAdr):
+	os.remove( SocketAdr )
+socket = socket.socket( socket.AF_UNIX, socket.SOCK_DGRAM )
+socket.bind(SocketAdr)
 
 def read_byte(reg):
     return bus.read_byte_data(address, reg)
@@ -39,7 +50,7 @@ address = 0x68       # via i2cdetect
 # Aktivieren, um das Modul ansprechen zu koennen
 bus.write_byte_data(address, power_mgmt_1, 0)
 
-print "Gyroskop"
+print "Gyroskop" 
 print "--------"
 
 gyroskop_xout = read_word_2c(0x43)
@@ -69,3 +80,4 @@ print "beschleunigung_zout: ", ("%6d" % beschleunigung_zout), " skaliert: ", bes
 print "X Rotation: " , get_x_rotation(beschleunigung_xout_skaliert, beschleunigung_yout_skaliert, beschleunigung_zout_skaliert)
 print "Y Rotation: " , get_y_rotation(beschleunigung_xout_skaliert, beschleunigung_yout_skaliert, beschleunigung_zout_skaliert)
 
+sent = socket.sendto(bytes('steer:'+val, 'UTF-8'), server_address)
