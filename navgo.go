@@ -18,6 +18,11 @@ type GpsMessage struct {
 	Speed float64
 }
 
+type GyroMessage struct {
+	xRot   float64
+	yRot  float64
+}
+
 func reader(r io.Reader) {
 	buf := make([]byte, 1024)
 	for {
@@ -49,6 +54,30 @@ func readFromGui(guiChan chan<- string) {
 	}
 }
 
+func readFromGyro(gyroChan chan<- string) {
+	gSocket, err := net.Listen("unix", "/tmp/gyro_socket.sock")
+	defer gSocket.Close()
+	if err != nil {
+		panic(err)
+	}
+    con, err := gSocket.Accept()
+    if err != nil {
+        println("gyro error", err)
+        return
+    }
+    defer con.Close()
+	for {
+	        buf := make([]byte, 512)
+	        nr, err := con.Read(buf)
+	        if err != nil {
+	            return
+	        }
+	        data := buf[0:nr]
+	        fmt.Println("MSG from Gyro: ", string(data))
+			gyroChan <- string(data)
+    }
+}
+
 func readFromGps(gpsChan chan<- string) {
 	var GuiConnForGpsData net.Conn = nil
 	gps.GpsLocation(func(lat, lon, speed float64) {
@@ -73,8 +102,10 @@ func readFromGps(gpsChan chan<- string) {
 func main() {
 	guiChannel := make(chan string, 1)
 	gpsChannel := make(chan string, 1)
+	gyroChannel := make(chan string, 1)
 	go readFromGui(guiChannel)
 	go readFromGps(gpsChannel)
+	go readFromGyro(gyroChannel)
 
 	socketLocation := "/tmp/python_socket.sock"
 	//https://golang.org/pkg/net/#Dial
