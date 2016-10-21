@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 	"net"
-	"rpipyservo/gps"
+	"rpi2servo/gps"
 	"time"
 )
 
