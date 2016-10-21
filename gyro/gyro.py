@@ -11,11 +11,14 @@ import sys
 # Register
 power_mgmt_1 = 0x6b
 power_mgmt_2 = 0x6c
+
+#Socket
 SocketAdr = "/tmp/gyro_socket.sock"
 if os.path.exists( SocketAdr):
 	os.remove( SocketAdr )
-socket = socket.socket( socket.AF_UNIX, socket.SOCK_DGRAM )
+socket = socket.socket( socket.AF_UNIX, socket.SOCK_STREAM )
 socket.bind(SocketAdr)
+socket.listen(1)
 
 def read_byte(reg):
     return bus.read_byte_data(address, reg)
@@ -80,4 +83,25 @@ print "beschleunigung_zout: ", ("%6d" % beschleunigung_zout), " skaliert: ", bes
 print "X Rotation: " , get_x_rotation(beschleunigung_xout_skaliert, beschleunigung_yout_skaliert, beschleunigung_zout_skaliert)
 print "Y Rotation: " , get_y_rotation(beschleunigung_xout_skaliert, beschleunigung_yout_skaliert, beschleunigung_zout_skaliert)
 
-sent = socket.sendto(bytes('steer:'+val, 'UTF-8'), server_address)
+
+xRotation = "X %f" %  get_x_rotation(beschleunigung_xout_skaliert, beschleunigung_yout_skaliert, beschleunigung_zout_skaliert)
+
+print(xRotation)
+
+#begin to listen
+socket.listen(1)
+conn, addr = socket.accept()
+
+doListen = True;
+data = conn.recv(1024)
+print("incoming connection")
+print(data)
+conn.send('hello')
+while doListen:
+	conn.send(xRotation);
+
+socket.close()
+os.remove(SocketAdr);
+
+	
+	
