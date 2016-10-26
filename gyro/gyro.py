@@ -6,6 +6,8 @@ import os, os.path
 import time
 import signal
 import sys
+import json
+
 
 
 # Register
@@ -47,6 +49,19 @@ def get_x_rotation(x,y,z):
     radians = math.atan2(y, dist(x,z))
     return math.degrees(radians)
 
+
+def readAllAsJson():
+	gx = read_word_2c(0x43) / 131
+	gy = read_word_2c(0x45) / 131
+	gz = read_word_2c(0x47) / 131
+	ax = read_word_2c(0x3b) / 16384.0
+	ay = read_word_2c(0x3d) / 16384.0
+	az = read_word_2c(0x3f) / 16384.0
+	jsonString =  json.dumps({'gx':gx,'gy':gy,'gz':gz,'ax':ax,'ay':ay,'az':az}, sort_keys=True)
+	return jsonString
+
+    
+
 bus = smbus.SMBus(1) # bus = smbus.SMBus(0) fuer Revision 1
 address = 0x68       # via i2cdetect
 
@@ -84,9 +99,21 @@ print "X Rotation: " , get_x_rotation(beschleunigung_xout_skaliert, beschleunigu
 print "Y Rotation: " , get_y_rotation(beschleunigung_xout_skaliert, beschleunigung_yout_skaliert, beschleunigung_zout_skaliert)
 
 
-xRotation = "X %f" %  get_x_rotation(beschleunigung_xout_skaliert, beschleunigung_yout_skaliert, beschleunigung_zout_skaliert)
+xrotation = "X %f" %  get_x_rotation(beschleunigung_xout_skaliert, beschleunigung_yout_skaliert, beschleunigung_zout_skaliert)
+ 
+print(xrotation)
 
-print(xRotation)
+gx = read_word_2c(0x43) / 131
+gy = read_word_2c(0x45) / 131
+gz = read_word_2c(0x47) / 131
+
+ax = read_word_2c(0x3b) / 16384.0
+ay = read_word_2c(0x3d) / 16384.0
+az = read_word_2c(0x3f) / 16384.0
+
+jsonString =  json.dumps({'gx':gx,'gy':gy,'gz':gz,'ax':ax,'ay':ay,'az':az}, sort_keys=True)
+
+
 
 #begin to listen
 socket.listen(1)
@@ -98,7 +125,7 @@ print("incoming connection")
 print(data)
 conn.send('hello')
 while doListen:
-	conn.send(xRotation);
+	conn.send(readAllAsJson() + '\n');
 
 socket.close()
 os.remove(SocketAdr);

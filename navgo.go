@@ -19,8 +19,12 @@ type GpsMessage struct {
 }
 
 type GyroMessage struct {
-	xRot   float64
-	yRot  float64
+	ax   float64
+	ay  float64
+	az float64
+	gx float64
+	gy float64
+	gz float64
 }
 
 func reader(r io.Reader) {
@@ -56,10 +60,10 @@ func readFromGui(guiChan chan<- string) {
 
 func readFromGyro(gyroChan chan<- string) {
 	gSocket, err := net.Listen("unix", "/tmp/gyro_socket.sock")
-	defer gSocket.Close()
 	if err != nil {
 		panic(err)
 	}
+	defer gSocket.Close()
     con, err := gSocket.Accept()
     if err != nil {
         println("gyro error", err)
