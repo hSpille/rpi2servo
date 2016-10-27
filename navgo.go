@@ -19,8 +19,8 @@ type GpsMessage struct {
 }
 
 type GyroMessage struct {
-	ax   float64
-	ay  float64
+	ax float64
+	ay float64
 	az float64
 	gx float64
 	gy float64
@@ -59,27 +59,25 @@ func readFromGui(guiChan chan<- string) {
 }
 
 func readFromGyro(gyroChan chan<- string) {
-	gSocket, err := net.Listen("unix", "/tmp/gyro_socket.sock")
+	gSocket, err := net.Dial("unix", "/tmp/gyro_socket.sock")
 	if err != nil {
 		panic(err)
 	}
 	defer gSocket.Close()
-    con, err := gSocket.Accept()
-    if err != nil {
-        println("gyro error", err)
-        return
-    }
-    defer con.Close()
+	_, err = gSocket.Write([]byte("hello"))
+	if err != nil {
+		panic(err)
+	}
+	buf := make([]byte, 1024)
 	for {
-	        buf := make([]byte, 512)
-	        nr, err := con.Read(buf)
-	        if err != nil {
-	            return
-	        }
-	        data := buf[0:nr]
-	        fmt.Println("MSG from Gyro: ", string(data))
-			gyroChan <- string(data)
-    }
+        n, err := gSocket.Read(buf[:])
+        if err != nil {
+            panic(err)
+        }
+        data := buf[0:n]
+        println("Gyro sent:", string(data))
+		gyroChan <- string(data)
+	}
 }
 
 func readFromGps(gpsChan chan<- string) {
