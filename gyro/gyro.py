@@ -20,7 +20,6 @@ if os.path.exists( SocketAdr):
 	os.remove( SocketAdr )
 socket = socket.socket( socket.AF_UNIX, socket.SOCK_STREAM )
 socket.bind(SocketAdr)
-socket.listen(1)
 
 def read_byte(reg):
     return bus.read_byte_data(address, reg)

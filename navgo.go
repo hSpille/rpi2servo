@@ -112,6 +112,7 @@ func main() {
 	//https://golang.org/pkg/net/#Dial
 	c, err := net.Dial("unixgram", socketLocation)
 	if err != nil {
+		fmt.Println("Gui sock problem!")
 		panic(err)
 	}
 	defer c.Close()
@@ -122,6 +123,7 @@ func main() {
 			fmt.Println("received message", msg)
 			_, err := c.Write([]byte(msg))
 			if err != nil {
+				fmt.Println("Gui recv problem!")
 				panic(err)
 			}
 			break
@@ -136,6 +138,7 @@ func main() {
 			//Stop the car - we got no news from the controller for too long
 			_, err := c.Write([]byte("speed:250"))
 			if err != nil {
+				fmt.Println("Fatal write error")
 				log.Fatal("write error:", err)
 				break
 			}
