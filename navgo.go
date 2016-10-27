@@ -129,6 +129,9 @@ func main() {
 		case msg := <-gpsChannel:
 			fmt.Println("GPS message", msg)
 			break
+		case msg := <- gyroChannel:
+			fmt.Println("Gyro message", msg)
+			break
 		case _ = <-time.NewTicker(1000 * time.Millisecond).C:
 			fmt.Println("no message from Gui")
 			//Stop the car - we got no news from the controller for too long
