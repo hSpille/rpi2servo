@@ -121,9 +121,7 @@ conn, addr = socket.accept()
 
 doListen = True;
 data = conn.recv(1024)
-print("incoming connection")
-print(data)
-conn.send('hello')
+print("GYRO: incoming connection")
 while doListen:
 	conn.send(readAllAsJson() + '\n');
 

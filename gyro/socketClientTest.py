@@ -9,7 +9,6 @@ if os.path.exists("/tmp/gyro_socket.sock"):
 	client.connect("/tmp/gyro_socket.sock")
 	try:
 		print("waiting for data")
-		client.send('hello');
 		while True:
 			data = client.recv(1024)
 			print(data)

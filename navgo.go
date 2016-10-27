@@ -75,7 +75,6 @@ func readFromGyro(gyroChan chan<- string) {
             panic(err)
         }
         data := buf[0:n]
-        println("Gyro sent:", string(data))
 		gyroChan <- string(data)
 	}
 }
