@@ -12,7 +12,7 @@ if os.path.exists("/tmp/gyro_socket.sock"):
 		while True:
 			data = client.recv(1024)
 			print(data)
-			time.sleep(2)
+			time.sleep(0.25)
 	finally:
 		print("closing test socket")
 		client.close()

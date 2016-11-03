@@ -122,7 +122,8 @@ doListen = True;
 data = conn.recv(1024)
 print("GYRO: incoming connection")
 while doListen:
-	conn.send(readAllAsJson() + '\n');
+    time.sleep(0.1);
+    conn.send(readAllAsJson() + '\n');
 
 socket.close()
 os.remove(SocketAdr);
