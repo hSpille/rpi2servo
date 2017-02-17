@@ -27,11 +27,14 @@ based on linux gpsd: https://wiki.ubuntuusers.de/gpsd/
 
 ###### RC Car
 is a LRP S8BX http://www.lrp.cc/de/produkt/lrp-s8-bx-rtr-18-nitro-buggy-rtr-1/ 
+![Alt text](/IMG_20160422_221632.jpg?raw=true "TheCar")
 ###### Raspberry 
 PI B. Default. What do i say? 
 ###### Servos
 Adafruid Servo hat: https://www.adafruit.com/product/2327
 ###### GPS
 Ublox NEO 6M GPS Modul Aircraft Flight Controller https://www.amazon.de/dp/B00S4RLICU/ref=cm_sw_r_tw_dp_x_dk2Pyb7SNS70C
+
+
 ###### Gyro
 MPU 9250 code based on  https://github.com/micropython-IMU/micropython-mpu9x50 and http://blog.bitify.co.uk/2013/11/using-complementary-filter-to-combine.html
