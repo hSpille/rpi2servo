@@ -34,7 +34,7 @@ PI B. Default. What do i say?
 Adafruid Servo hat: https://www.adafruit.com/product/2327
 ###### GPS
 Ublox NEO 6M GPS Modul Aircraft Flight Controller https://www.amazon.de/dp/B00S4RLICU/ref=cm_sw_r_tw_dp_x_dk2Pyb7SNS70C
-![Alt text](/frame-004.jpg?raw=true "TheCar")
+![Alt text](/frame-024.jpg?raw=true "TheCar")
 
 
 ###### Gyro
