@@ -1,11 +1,23 @@
-package gps
+package main
+
+//Test a socket with socat like: socat - UNIX-CONNECT:/tmp/gps_socket
 
 // #cgo LDFLAGS: -lgps -lm
 // #include <gps.h>
 import "C"
 import "fmt"
+import "net"
+import 	"encoding/json"
+import "os"
 
-type GpsLocationCallback func(float64, float64, float64)
+type GpsMessage struct {
+	Lat   float64
+	Long  float64
+	Speed float64
+}
+
+
+type GpsLocationCallback func(float64, float64, float64) bool
 
 func GpsLocation(cb GpsLocationCallback) {
 	var data C.struct_gps_data_t
@@ -18,9 +30,51 @@ func GpsLocation(cb GpsLocationCallback) {
 			lat := float64(data.fix.latitude)
 			lon := float64(data.fix.longitude)
 			speed := float64(data.fix.speed)
-			cb(lat, lon, speed)
+			if cb(lat, lon, speed) {
+				break;
+			}
 		} else {
 			fmt.Println("No GPS fix:", data.fix.mode)
 		}
+	}
+}
+
+
+func readGps(conn *net.UnixConn) {
+	defer conn.Close()
+	GpsLocation(func(lat, lon, speed float64) bool {
+		gpsLocation := GpsMessage{lat, lon, speed}
+		jsonGps, err := json.Marshal(&gpsLocation)
+		if err != nil {
+			fmt.Println("Error", err)
+		}
+		_, err = conn.Write([]byte(jsonGps))
+		if err != nil {
+			fmt.Println("Client disconnect:" , err)
+			return true
+		}
+		return false
+	})
+}
+
+
+func main() {
+	l, err := net.ListenUnix("unix",&net.UnixAddr{"/tmp/gps_socket", "unix"})
+	if err != nil {
+		panic(err)
+	}
+	defer os.Remove("/tmp/gps_socket")
+	for{
+		conn, err := l.AcceptUnix()
+		if err != nil{
+			panic(err)
+		}
+
+		b := []byte("hi")
+		_, err = conn.Write(b)
+		readGps(conn)
+        if err != nil {
+            panic(err)
+        }
 	}
 }

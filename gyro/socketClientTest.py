@@ -4,9 +4,9 @@ import time
 # import os, os.path
 
 print("Connecting...")
-if os.path.exists("/tmp/gyro_socket.sock"):
+if os.path.exists("/tmp/gps_socket"):
 	client = socket.socket( socket.AF_UNIX, socket.SOCK_STREAM )
-	client.connect("/tmp/gyro_socket.sock")
+	client.connect("/tmp/gps_socket")
 	try:
 		print("waiting for data")
 		while True:
