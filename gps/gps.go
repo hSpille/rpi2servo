@@ -9,6 +9,7 @@ import "fmt"
 import "net"
 import 	"encoding/json"
 import "os"
+import "sync"
 
 type GpsMessage struct {
 	Lat   float64
@@ -63,18 +64,48 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer os.Remove("/tmp/gps_socket")
-	for{
-		conn, err := l.AcceptUnix()
-		if err != nil{
-			panic(err)
-		}
 
-		b := []byte("hi")
-		_, err = conn.Write(b)
-		readGps(conn)
-        if err != nil {
-            panic(err)
-        }
-	}
+	var connections []*net.UnixConn
+	var connectionsMu sync.Mutex
+
+	go func() {
+		defer os.Remove("/tmp/gps_socket")
+		for{
+			conn, err := l.AcceptUnix()
+			if err != nil{
+				panic(err)
+			}
+
+			connectionsMu.Lock()
+			connections = append(connections, conn)
+			connectionsMu.Unlock()
+
+			// b := []byte("hi")
+			// _, err = conn.Write(b)
+			// readGps(conn)
+	  //       if err != nil {
+	  //           panic(err)
+	  //       }
+		}
+	}()
+
+	GpsLocation(func(lat, lon, speed float64) bool {
+		gpsLocation := GpsMessage{lat, lon, speed}
+		jsonGps, err := json.Marshal(&gpsLocation)
+		if err != nil {
+			fmt.Println("Error", err)
+		}
+		var toRemove []*net.UnixConn
+		connectionsMu.Lock()
+		for _, conn := range connections {
+			_, err = conn.Write([]byte(jsonGps))
+			if err != nil {
+				fmt.Println("Client disconnect:" , err)
+				toRemove =append(conn)
+			}
+		}
+		connectionsMu.Unlock()
+		return false
+	})
+
 }
