@@ -100,12 +100,12 @@ func main() {
 			_, err = conn.Write([]byte(jsonGps))
 			if err != nil {
 				fmt.Println("Client disconnect:", err)
-				toRemove = append(toRemove, index)
+				toRemove = append(toRemove, index-1)
 			}
 		}
 		if len(toRemove) > 0 {
-			for i := 0; i < index; i++ {
-				connections = append(connections[:i], connections[i+1:]...)
+			for i := 0; i < len(toRemove); i++ {
+				connections = append(connections[:toRemove[i]], connections[toRemove[i]+1:]...)
 			}
 		}
 		connectionsMu.Unlock()
